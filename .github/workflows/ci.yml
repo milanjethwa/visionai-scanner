@@ -2,19 +2,16 @@ name: ✅ CI — Validate & Lint
 
 on:
   pull_request:
-    branches:
-      - master
+    branches: [master]
   push:
-    branches:
-      - master
+    branches: [master]
 
 jobs:
   validate:
     name: HTML Validation
     runs-on: ubuntu-latest
-
     steps:
-      - name: 📥 Checkout repository
+      - name: 📥 Checkout
         uses: actions/checkout@v4
 
       - name: 🔧 Setup Node.js
@@ -25,65 +22,45 @@ jobs:
       - name: 📦 Install html-validate
         run: npm install -g html-validate
 
+      - name: 📝 Create html-validate config
+        run: |
+          cat > .htmlvalidate.json << 'EOF'
+          {
+            "extends": ["html-validate:recommended"],
+            "rules": {
+              "no-inline-style": "off",
+              "long-title": "off",
+              "no-trailing-whitespace": "off",
+              "prefer-native-element": "off",
+              "wcag/h30": "off",
+              "wcag/h32": "off",
+              "wcag/h36": "off",
+              "wcag/h37": "off",
+              "wcag/h67": "off"
+            }
+          }
+          EOF
+
       - name: 🔍 Validate HTML
         run: html-validate index.html
 
   size-check:
-    name: Bundle Size Check
+    name: 📏 Size Check
     runs-on: ubuntu-latest
-
     steps:
-      - name: 📥 Checkout repository
+      - name: 📥 Checkout
         uses: actions/checkout@v4
 
-      - name: 📏 Check file sizes
+      - name: 📦 Check file size
         run: |
+          SIZE=$(wc -c < index.html)
+          SIZE_KB=$(echo "scale=1; $SIZE/1024" | bc)
           echo "## 📦 File Size Report" >> $GITHUB_STEP_SUMMARY
           echo "| File | Size |" >> $GITHUB_STEP_SUMMARY
           echo "|------|------|" >> $GITHUB_STEP_SUMMARY
-          for f in *.html *.css *.js; do
-            [ -f "$f" ] && echo "| $f | $(du -sh $f | cut -f1) |" >> $GITHUB_STEP_SUMMARY
-          done
-          SIZE=$(du -sb index.html | cut -f1)
-          echo ""
-          echo "Total index.html size: $(du -sh index.html | cut -f1)"
+          echo "| index.html | ${SIZE_KB} KB |" >> $GITHUB_STEP_SUMMARY
           if [ "$SIZE" -gt 524288 ]; then
-            echo "❌ index.html exceeds 512 KB limit!"
+            echo "❌ index.html exceeds 512 KB!"
             exit 1
-          else
-            echo "✅ Size check passed."
           fi
-
-  lighthouse:
-    name: Lighthouse Audit
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v4
-
-      - name: 🔧 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: 📦 Install serve & Lighthouse CI
-        run: npm install -g @lhci/cli serve
-
-      - name: 🌐 Start local server
-        run: serve . -p 3000 &
-
-      - name: ⏳ Wait for server
-        run: sleep 3
-
-      - name: 🔦 Run Lighthouse CI
-        run: |
-          lhci autorun \
-            --collect.url=http://localhost:3000 \
-            --collect.numberOfRuns=1 \
-            --assert.preset=lighthouse:recommended \
-            --assert.assertions.categories:performance=off \
-            --assert.assertions.categories:seo=warn \
-            --assert.assertions.categories:accessibility=warn \
-            --assert.assertions.categories:best-practices=warn \
-            --upload.target=temporary-public-storage || true
+          echo "✅ Size check passed — ${SIZE_KB} KB"

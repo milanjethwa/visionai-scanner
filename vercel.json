@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "name": "visionai-scanner",
+  "builds": [
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
+}
