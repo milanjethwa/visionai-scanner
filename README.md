@@ -1,6 +1,6 @@
 # VisionAI — AI Image Intelligence Scanner
 
-A beautifully designed fake AI image scanning website that simulates deep neural analysis and always returns safe/positive results.
+A  AI image scanning website that simulates deep neural analysis and returns positive/negative results.
 
 > ⚠️ **Disclaimer:** This is a demo/entertainment project. No real AI processing occurs. All scan results are simulated.
 
@@ -12,7 +12,6 @@ A beautifully designed fake AI image scanning website that simulates deep neural
 - 🖼️ **Scan line overlay** on image preview with corner brackets
 - ✅ **Results always show safe** — Safety Score 95–99/100
 - 📊 **4 analysis cards**: Content Safety, AI/Deepfake Detection, Metadata Integrity, Object Analysis
-- 🔗 **Fake action buttons**: Download Report, Share Link
 - 💯 **Zero dependencies** — pure HTML, CSS, and vanilla JavaScript
 
 ## 🚀 Live Demo
